@@ -83,6 +83,7 @@ describe('marsrover node module.', function() {
                 });
 
             });
+
             describe('should go backward when b received', function() {
                 it('should increase y when looking north and b received', function() {
                     orientAndMoveRover('N', 'b');
@@ -105,6 +106,37 @@ describe('marsrover node module.', function() {
                     checkRoverPosition(INITIAL_X + 1, INITIAL_Y);
                 });
 
+            });
+
+            describe('should go back to initial state when fb or bf received', function() {
+
+                it('should go back to initial when fb received', function() {
+                    orientAndMoveRover('N', ['f', 'b']);
+
+                    checkRoverPosition(INITIAL_X, INITIAL_Y);
+                });
+
+                it('should go back to initial when bf received', function() {
+                    orientAndMoveRover('N', ['b', 'f']);
+
+                    checkRoverPosition(INITIAL_X, INITIAL_Y);
+                });
+
+                it('should go back to initial when any paired-combination of fs and bs', function() {
+                    orientAndMoveRover('N', ['b', 'f', 'f', 'b']);
+                    checkRoverPosition(INITIAL_X, INITIAL_Y);
+
+                    orientAndMoveRover('N', ['b', 'b', 'b', 'f', 'f', 'f']);
+                    checkRoverPosition(INITIAL_X, INITIAL_Y);
+
+                });
+
+                it('shoud advance as many times as fs or bs received', function() {
+                    orientAndMoveRover('N', ['f', 'f', 'f']);
+                    checkRoverPosition(INITIAL_X, INITIAL_Y + 3);
+
+
+                });
             });
         });
     });
