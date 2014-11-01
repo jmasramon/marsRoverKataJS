@@ -17,10 +17,22 @@ describe('marsrover node module.', function() {
     var INITIAL_Y = 2;
     var INITIAL_ORI = 'N';
 
-    function orientAndMoveRover(orientation, command) {
-        rover = new Rover(INITIAL_X, INITIAL_Y, orientation);
-        rover.setCommands([command]);
+    function moveRover(command) {
+        rover.setCommands(command);
         rover.executeCommands();
+    }
+
+    function orientAndMoveRover(orientation, command) {
+        rover = new Rover({
+            x: INITIAL_X,
+            y: INITIAL_Y
+        }, orientation);
+        moveRover(command);
+    }
+
+    function chekcRoverStatus(x, y, orientation) {
+        checkRoverPosition(x, y);
+        checkRoverOrientation(orientation);
     }
 
     function checkRoverPosition(expX, expY) {
@@ -30,8 +42,15 @@ describe('marsrover node module.', function() {
         });
     }
 
+    function checkRoverOrientation(orientation) {
+        expect(rover.getOrientation()).to.equal(orientation);
+    }
+
     beforeEach(function() {
-        rover = new Rover(INITIAL_X, INITIAL_Y, INITIAL_ORI);
+        rover = new Rover({
+            x: INITIAL_X,
+            y: INITIAL_Y
+        }, INITIAL_ORI);
     });
 
     it('should create rovers with an initial position and orientation', function() {
@@ -46,11 +65,7 @@ describe('marsrover node module.', function() {
 
     describe('The rover receives a character array of commands.', function() {
         it('should have a setCommands function', function() {
-            expect(Rover.prototype.setCommands).to.exist;
-        });
-
-        xit('should recognize a string as a instanceof String', function() {
-            assert.equal(typeof 'actual' === 'string', true, "[message]");
+            expect(rover.setCommands).to.exist;
         });
 
         it('should accept a char array', function() {
@@ -58,67 +73,57 @@ describe('marsrover node module.', function() {
         });
     });
 
-    describe('the rober obeys commands', function() {
-        describe('should Implement commands that move the rover forward/backward (f,b)', function() {
-            describe('should go forward when f received', function() {
+    describe('The rober obeys commands.', function() {
+        describe('should Implement commands that move the rover forward/backward (f,b).', function() {
+            describe('should go forward when f received.', function() {
                 it('should increase y when looking north and f received', function() {
-                    orientAndMoveRover('N', 'f');
-
+                    orientAndMoveRover('N', ['f']);
                     checkRoverPosition(INITIAL_X, INITIAL_Y + 1);
                 });
                 it('should increase x when looking east and f received', function() {
-                    orientAndMoveRover('E', 'f');
-
+                    orientAndMoveRover('E', ['f']);
                     checkRoverPosition(INITIAL_X + 1, INITIAL_Y);
                 });
                 it('should decrease y when looking south and f received', function() {
-                    orientAndMoveRover('S', 'f');
-
+                    orientAndMoveRover('S', ['f']);
                     checkRoverPosition(INITIAL_X, INITIAL_Y - 1);
                 });
                 it('should decrease x when looking west and f received', function() {
-                    orientAndMoveRover('W', 'f');
-
+                    orientAndMoveRover('W', ['f']);
                     checkRoverPosition(INITIAL_X - 1, INITIAL_Y);
                 });
 
             });
 
-            describe('should go backward when b received', function() {
+            describe('should go backward when b received.', function() {
                 it('should increase y when looking north and b received', function() {
-                    orientAndMoveRover('N', 'b');
-
+                    orientAndMoveRover('N', ['b']);
                     checkRoverPosition(INITIAL_X, INITIAL_Y - 1);
                 });
                 it('should increase x when looking east and b received', function() {
-                    orientAndMoveRover('E', 'b');
-
+                    orientAndMoveRover('E', ['b']);
                     checkRoverPosition(INITIAL_X - 1, INITIAL_Y);
                 });
                 it('should decrease y when looking south and b received', function() {
-                    orientAndMoveRover('S', 'b');
-
+                    orientAndMoveRover('S', ['b']);
                     checkRoverPosition(INITIAL_X, INITIAL_Y + 1);
                 });
                 it('should decrease x when looking west and b received', function() {
-                    orientAndMoveRover('W', 'b');
-
+                    orientAndMoveRover('W', ['b']);
                     checkRoverPosition(INITIAL_X + 1, INITIAL_Y);
                 });
 
             });
 
-            describe('should go back to initial state when fb or bf received', function() {
+            describe('should accept poly-commands.', function() {
 
                 it('should go back to initial when fb received', function() {
                     orientAndMoveRover('N', ['f', 'b']);
-
                     checkRoverPosition(INITIAL_X, INITIAL_Y);
                 });
 
                 it('should go back to initial when bf received', function() {
                     orientAndMoveRover('N', ['b', 'f']);
-
                     checkRoverPosition(INITIAL_X, INITIAL_Y);
                 });
 
@@ -139,7 +144,193 @@ describe('marsrover node module.', function() {
                 });
             });
         });
+
+        describe('should implement commands that turn the rover left/right (l,r)', function() {
+            describe('should turn left when l received', function() {
+                it('should reorient W when N and l', function() {
+                    orientAndMoveRover('N', ['l']);
+                    checkRoverOrientation('W');
+                });
+                it('should reorient N when E and l', function() {
+                    orientAndMoveRover('E', ['l']);
+                    checkRoverOrientation('N');
+                });
+                it('should reorient E when N and lll', function() {
+                    orientAndMoveRover('N', ['l', 'l', 'l']);
+                    checkRoverOrientation('E');
+                });
+                it('should reorient W when N and lllll', function() {
+                    orientAndMoveRover('N', ['l', 'l', 'l', 'l', 'l']);
+                    checkRoverOrientation('W');
+                });
+
+            });
+
+            describe('should turn right when r received', function() {
+                it('should reorient E when N and r', function() {
+                    orientAndMoveRover('N', ['r']);
+                    checkRoverOrientation('E');
+                });
+                it('should reorient S when E and r', function() {
+                    orientAndMoveRover('E', ['r']);
+                    checkRoverOrientation('S');
+                });
+                it('should reorient N when N and rrrr', function() {
+                    orientAndMoveRover('N', ['l', 'l', 'l', 'l']);
+                    checkRoverOrientation('N');
+                });
+                it('should reorient E when N and rrrrr', function() {
+                    orientAndMoveRover('N', ['r', 'r', 'r', 'r', 'r']);
+                    checkRoverOrientation('E');
+                });
+            });
+        });
     });
+
+    describe('Implement wrapping from one edge of the grid to another (planets are spheres after all).', function() {
+        describe('The rover should have a defined grid', function() {
+            xit('should have a grid', function() {
+                expect(rover.grid).to.exist;
+            });
+        });
+
+        it('should go to (0,-5,N) when from (0,5,N) receives an f', function() {
+            rover = new Rover({
+                x: 0,
+                y: 5
+            }, 'N');
+            moveRover(['f']);
+            chekcRoverStatus(0, -5, 'N');
+        });
+
+        it('should go to (0,5,S) when from (0,-5,S) receives an f', function() {
+            rover = new Rover({
+                x: 0,
+                y: -5
+            }, 'S');
+            moveRover(['f']);
+            chekcRoverStatus(0, 5, 'S');
+        });
+
+        it('should go to (-5,0,E) when from (5,0,E) receives an f', function() {
+            rover = new Rover({
+                x: 5,
+                y: 0
+            }, 'E');
+            moveRover(['f']);
+            chekcRoverStatus(-5, 0, 'E');
+        });
+
+        it('should go to (5,0,W) when from (-5,0,W) receives an f', function() {
+            rover = new Rover({
+                x: -5,
+                y: 0
+            }, 'W');
+            moveRover(['f']);
+            chekcRoverStatus(5, 0, 'W');
+        });
+
+        it('should go to (-5,-5,N) when from (5,5,N) receives an rflf', function() {
+            rover = new Rover({
+                x: 5,
+                y: 5
+            }, 'N');
+            moveRover(['r', 'f', 'l', 'f']);
+            chekcRoverStatus(-5, -5, 'N');
+        });
+    });
+
+    describe('Implement obstacle detection before each move to a new square. ' +
+        'If a given sequence of commands encounters an obstacle, the rover moves up to the last possible point ' +
+        'and reports the obstacle.',
+        function() {
+
+            describe('should accept obstacle initialization', function() {
+                
+                it('should be able to accept a list of obstacles', function() {
+                    
+                    expect(rover.bewareOfObstacles).to.exist;
+                    
+                    assert.equal(typeof rover.bewareOfObstacles, 'function', "bewareOfObstacles should be a function of the rover");
+                    
+                    expect(rover.bewareOfObstacles([{
+                        x: 1,
+                        y: 2
+                    }])).to.equal('Roger that!');
+                });
+
+                it('should store a list of obstacles that gives back with getObstacles', function() {
+                    
+                    rover.bewareOfObstacles([{
+                        x: 1,
+                        y: 2
+                    }, {
+                        x: 4,
+                        y: 5
+                    }]);
+                    
+                    expect(rover.getObstacles()).to.deep.equal([{
+                        x: 1,
+                        y: 2
+                    }, {
+                        x: 4,
+                        y: 5
+                    }]);
+                });
+            });
+
+            describe('Once obstacle list received, When receiving orders ...', function() {
+                beforeEach(function () {
+                    rover.bewareOfObstacles([{
+                        x: 3,
+                        y: 3
+                    }, {
+                        x: 4,
+                        y: 5
+                    }]);
+                });
+
+                it('if obstacle in its right path, should stop and report obstacle', function () {
+                    
+                    
+                    try{
+                        moveRover(['f','r','f','f','f','l','f']);
+                    } catch (err) {
+                        expect(err.message).to.equal('Obstacle found!');    
+                    }
+                 });
+
+                it('if obstacle in its upper path, should stop and report obstacle', function () {
+                                       
+                    try{
+                        moveRover(['r','f','f','l','f','l','f']);
+                    } catch (err) {
+                        expect(err.message).to.equal('Obstacle found!');    
+                    }
+
+                });
+
+                it('if obstacle in its left path, should stop and report obstacle', function () {
+                                        
+                    try{
+                        moveRover(['r','f','f','f','l','f','l', 'f', 'f']);
+                    } catch (err) {
+                        expect(err.message).to.equal('Obstacle found!');    
+                    }
+
+                });
+
+                it('if obstacle in its bottom path, should stop and report obstacle', function () {
+                                        
+                    try{
+                        moveRover(['r','f','f','f','l','f','f', 'f', 'l','f','l','f','f']);
+                    } catch (err) {
+                        expect(err.message).to.equal('Obstacle found!');    
+                    }
+
+                });
+            });
+        });
 
     xit('expectation', function() {
         assert.isTrue(true, "obviously");
