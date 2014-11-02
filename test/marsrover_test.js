@@ -16,6 +16,13 @@ describe('marsrover node module.', function() {
     var INITIAL_X = 1;
     var INITIAL_Y = 2;
     var INITIAL_ORI = 'N';
+    var INITIAL_ENV = {
+        grid: {
+            height: 11,
+            width: 11
+        },
+        obstacles: []
+    };
 
     function moveRover(command) {
         rover.setCommands(command);
@@ -26,7 +33,7 @@ describe('marsrover node module.', function() {
         rover = new Rover({
             x: INITIAL_X,
             y: INITIAL_Y
-        }, orientation);
+        }, orientation, INITIAL_ENV);
         moveRover(command);
     }
 
@@ -50,7 +57,7 @@ describe('marsrover node module.', function() {
         rover = new Rover({
             x: INITIAL_X,
             y: INITIAL_Y
-        }, INITIAL_ORI);
+        }, INITIAL_ORI, INITIAL_ENV);
     });
 
     it('should create rovers with an initial position and orientation', function() {
