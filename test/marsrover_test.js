@@ -23,6 +23,10 @@ describe('marsrover node module.', function() {
         },
         obstacles: []
     };
+    var X_RIGHT_LIMIT = Math.floor(INITIAL_ENV.grid.width/2);
+    var X_LEFT_LIMIT = -Math.floor(INITIAL_ENV.grid.width/2);
+    var Y_UPPER_LIMIT = Math.floor(INITIAL_ENV.grid.height/2);
+    var Y_LOWER_LIMIT = -Math.floor(INITIAL_ENV.grid.height/2);
 
     function moveRover(command) {
         rover.setCommands(command);
@@ -201,16 +205,25 @@ describe('marsrover node module.', function() {
             });
         });
 
-        it('should go to (0,-5,N) when from (0,5,N) receives an f', function() {
+        it('should wrap up when from upper border receives an f', function() {
             rover = new Rover({
                 x: 0,
-                y: 5
+                y: Y_UPPER_LIMIT
             }, 'N');
             moveRover(['f']);
             chekcRoverStatus(0, -5, 'N');
         });
 
-        it('should go to (0,5,S) when from (0,-5,S) receives an f', function() {
+        it('should not wrap up when from upper border receives an b', function () {
+            rover = new Rover({
+                x: 0,
+                y: Y_UPPER_LIMIT
+            }, 'N');
+            moveRover(['b']);
+            chekcRoverStatus(0, 4, 'N');
+        });
+
+        it('should down wrap when from lower border receives an f', function() {
             rover = new Rover({
                 x: 0,
                 y: -5
@@ -219,7 +232,16 @@ describe('marsrover node module.', function() {
             chekcRoverStatus(0, 5, 'S');
         });
 
-        it('should go to (-5,0,E) when from (5,0,E) receives an f', function() {
+        it('should not down wrap when from lower border receives an b', function () {
+            rover = new Rover({
+                x: 0,
+                y: -5
+            }, 'S');
+            moveRover(['b']);
+            chekcRoverStatus(0, -4, 'S');
+        });
+
+        it('should wrap right when from right border receives an f', function() {
             rover = new Rover({
                 x: 5,
                 y: 0
@@ -228,7 +250,16 @@ describe('marsrover node module.', function() {
             chekcRoverStatus(-5, 0, 'E');
         });
 
-        it('should go to (5,0,W) when from (-5,0,W) receives an f', function() {
+        it('should not right wrap when from right border receives an b', function() {
+            rover = new Rover({
+                x: 5,
+                y: 0
+            }, 'E');
+            moveRover(['b']);
+            chekcRoverStatus(4, 0, 'E');
+        });
+
+        it('should left wrap when from left border receives an f', function() {
             rover = new Rover({
                 x: -5,
                 y: 0
@@ -237,10 +268,18 @@ describe('marsrover node module.', function() {
             chekcRoverStatus(5, 0, 'W');
         });
 
+        it('should not left wrap when from left border receives an b', function() {
+            rover = new Rover({
+                x: -5,
+                y: 0
+            }, 'W');
+            moveRover(['b']);
+            chekcRoverStatus(-4, 0, 'W');
+        });
         it('should go to (-5,-5,N) when from (5,5,N) receives an rflf', function() {
             rover = new Rover({
                 x: 5,
-                y: 5
+                y: Y_UPPER_LIMIT
             }, 'N');
             moveRover(['r', 'f', 'l', 'f']);
             chekcRoverStatus(-5, -5, 'N');
@@ -273,7 +312,7 @@ describe('marsrover node module.', function() {
                         y: 2
                     }, {
                         x: 4,
-                        y: 5
+                        y: Y_UPPER_LIMIT
                     }]);
                     
                     expect(rover.getObstacles()).to.deep.equal([{
@@ -281,7 +320,7 @@ describe('marsrover node module.', function() {
                         y: 2
                     }, {
                         x: 4,
-                        y: 5
+                        y: Y_UPPER_LIMIT
                     }]);
                 });
             });
@@ -293,7 +332,7 @@ describe('marsrover node module.', function() {
                         y: 3
                     }, {
                         x: 4,
-                        y: 5
+                        y: Y_UPPER_LIMIT
                     }]);
                 });
 
