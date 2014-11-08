@@ -1,6 +1,8 @@
 /*global describe,it, assert, expect, beforeEach */
 'use strict';
 var marsrover = require('../lib/marsrover.js'),
+    map = require('../lib/map'),
+    standardStrategy = require('../lib/standardStrategy'),
     sinonChai = require('sinon-chai'),
     chai = require('chai');
 
@@ -12,6 +14,7 @@ chai.use(sinonChai);
 
 describe('The marsrover node module.', function() {
     var Rover = marsrover.Rover;
+    var Map = map.Map;
     var rover;
     var INITIAL_X = 1;
     var INITIAL_Y = 2;
@@ -312,11 +315,11 @@ describe('The marsrover node module.', function() {
 
                 it('should be able to accept a list of obstacles', function() {
 
-                    expect(rover.bewareOfObstacles).to.exist;
+                    expect(rover.setObstacles).to.exist;
 
-                    assert.equal(typeof rover.bewareOfObstacles, 'function', "bewareOfObstacles should be a function of the rover");
+                    assert.equal(typeof rover.setObstacles, 'function', "setObstacles should be a function of the rover");
 
-                    expect(rover.bewareOfObstacles([{
+                    expect(rover.setObstacles([{
                         x: 1,
                         y: 2
                     }])).to.equal('Roger that!');
@@ -324,7 +327,7 @@ describe('The marsrover node module.', function() {
 
                 it('should store a list of obstacles', function() {
 
-                    rover.bewareOfObstacles([{
+                    rover.setObstacles([{
                         x: 1,
                         y: 2
                     }, {
@@ -335,14 +338,14 @@ describe('The marsrover node module.', function() {
                 });
 
                 it('should reject bad lists of obstacles', function() {
-                    expect(rover.bewareOfObstacles(['a', (1, 2)])).to.equal('Bad obstacle list');
+                    expect(rover.setObstacles(['a', (1, 2)])).to.equal('Bad obstacle list');
                 });
             });
 
             describe('Once an obstacle list is received, when receiving orders, ', function() {
 
                 beforeEach(function() {
-                    rover.bewareOfObstacles([{
+                    rover.setObstacles([{
                         x: 3,
                         y: 3
                     }, {
@@ -392,4 +395,78 @@ describe('The marsrover node module.', function() {
                 });
             });
         });
+
+    describe('It should allow injection of different maps and moving strategies', function() {
+        var grid,
+            obstacles;
+        beforeEach(function() {
+            grid = {
+                height: 101,
+                width: 101
+            };
+            obstacles = [{
+                x: 3,
+                y: 5
+            }, {
+                x: 1,
+                y: Y_LOWER_LIMIT
+            }];
+        });
+
+        it('should accept a different map', function() {
+            rover.setMap(new Map(grid, obstacles));
+        });
+
+        describe('It should work properly with the new map. When new map, it', function() {
+            it('should wrap up when from upper border receives an f', function() {
+                rover = new Rover({
+                    x: 0,
+                    y: (101 - 1) / 2
+                }, 'N');
+                moveRover(['f']);
+                chekcRoverStatus(0, -(101 - 1) / 2, 'N');
+            });
+        });
+
+        it('should accept a different moving strategy', function() {
+            rover.setMovingStrategies(standardStrategy.movingStrategies);
+        });
+
+        describe('It should work properly with the new strategy. When new strategy, it', function() {
+            it('should move two steps north when pointing N it receives an f', function() {
+                var movingStrategies = standardStrategy.movingStrategies;
+
+                movingStrategies.moveVertically = function(direction, position) {
+                    if (direction === 'up') {
+                        position.y += 2;
+                    } else if (direction === 'down') {
+                        position.y -= 2;
+                    }
+                };
+
+                console.log('new Moving strategy = ');
+                console.log(movingStrategies);
+                var position = {
+                    x: 0,
+                    y: 0
+                };
+                movingStrategies.moveVertically('up', position);
+                expect(position).to.deep.equal({
+                    x: 0,
+                    y: 2
+                });
+
+
+                rover = new Rover({
+                    x: 0,
+                    y: 0
+                }, 'N');
+
+                rover.setMovingStrategies(movingStrategies);
+
+                moveRover(['f']);
+                chekcRoverStatus(0, 2, 'N');
+            });
+        });
+    });
 });
