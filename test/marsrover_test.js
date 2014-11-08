@@ -433,7 +433,7 @@ describe('The marsrover node module.', function() {
         });
 
         describe('It should work properly with the new strategy. When new strategy, it', function() {
-            it('should move two steps north when pointing N it receives an f', function() {
+            it('should enable new strategies through monkey patching', function() {
                 var movingStrategies = standardStrategy.movingStrategies;
 
                 movingStrategies.moveVertically = function(direction, position) {

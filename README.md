@@ -28,22 +28,17 @@ $ grunt browserify
 
 
 
-## Documentation
+## Documentation Jordi's version
 
-_(Coming soon)_
+I have done this kata in javascript to play a little with the different types of 
+inheritance you can use in javascript and the implications of each one.
 
+I have created a map object with a classical inheritance pattern: a constructor function and new
 
-## Examples
+I have created a standardStrategy as the parent object of all movingStrategies using the modern 
+pattern of prototypical inheritance (kind of). standarStrategy is a singleton defined with and object
+Literal. It has no constructor function -> no access to prototype -> cannot use Object.create to 
+create child objects -> monkey patch instead.
 
-_(Coming soon)_
-
-
-## Contributing
-
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com).
-
-
-## License
-
-Copyright (c) 2014   
-Licensed under the MIT license.
+standardStrategy could be better with a constructor function and using Object.create(constructor.prototype)?
+It would need implementing the Singleton pattern so it seems overkill.
